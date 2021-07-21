@@ -17,8 +17,12 @@ export default class MeasureLayout extends React.Component {
       nativeEvent: { layout },
     } = event;
     this.setState({
-      ...layout,
-      y: layout.y + (Platform.OS === "android" ? Constants.statusBarHeight : 0),
+      layout: {
+        ...layout,
+        y:
+          layout.y +
+          (Platform.OS === "android" ? Constants.statusBarHeight : 0),
+      },
     });
   };
 

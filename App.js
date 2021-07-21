@@ -17,6 +17,12 @@ import Status from "./components/Status";
 import Toolbar from "./components/Toolbar";
 import { installWebGeolocationPolyfill } from "expo-location";
 import ImageGrid from "./components/ImageGrid";
+import KeyboardState from "./components/KeyboardState";
+import MeasureLayout from "./components/MeasureLayout";
+import MessagingContainer, {
+  INPUT_METHOD,
+} from "./components/MessagingContainer";
+
 installWebGeolocationPolyfill();
 export default class App extends React.Component {
   state = {
@@ -31,9 +37,19 @@ export default class App extends React.Component {
     ],
     fullscreenImageId: null,
     isInputFocused: false,
+    inputMethod: INPUT_METHOD.NONE,
   };
 
-  handlePressToolbarCamera = () => {};
+  handleChangeInputMethod = (inputMethod) => {
+    this.setState({ inputMethod });
+  };
+
+  handlePressToolbarCamera = () => {
+    this.setState({
+      isInputFocused: false,
+      inputMethod: INPUT_METHOD.CUSTOM,
+    });
+  };
 
   handlePressToolbarLocation = () => {
     const { messages } = this.state;
@@ -116,6 +132,7 @@ export default class App extends React.Component {
   };
 
   renderMessageList() {
+    console.log(1);
     const { messages } = this.state;
     return (
       <View style={styles.content}>
@@ -134,13 +151,13 @@ export default class App extends React.Component {
     });
   };
 
-  renderInputMethodEditor() {
+  renderInputMethodEditor = () => {
     return (
       <View style={styles.inputMethodEditor}>
         <ImageGrid onPressImage={this.handlePressImage} />
       </View>
     );
-  }
+  };
 
   renderToolbar() {
     const { isInputFocused } = this.state;
@@ -174,12 +191,28 @@ export default class App extends React.Component {
   };
 
   render() {
+    const { inputMethod } = this.state;
     return (
       <View style={styles.container}>
         <Status />
-        {this.renderMessageList()}
-        {this.renderToolbar()}
-        {this.renderInputMethodEditor()}
+        <MeasureLayout>
+          {(layout) => (
+            <KeyboardState layout={layout}>
+              {(keyboardInfo) => (
+                <MessagingContainer
+                  {...keyboardInfo}
+                  inputMethod={inputMethod}
+                  onChangeInputMethod={this.handleChangeInputMethod}
+                  renderInputMethodEditor={this.renderInputMethodEditor}
+                >
+                  {this.renderMessageList()}
+                  {this.renderToolbar()}
+                </MessagingContainer>
+              )}
+            </KeyboardState>
+          )}
+        </MeasureLayout>
+
         {this.renderFullscreenImage()}
       </View>
     );
